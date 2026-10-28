@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+pandas
+numpy
+httpx
+sqlalchemy>=2
+psycopg[binary]>=3
+pydantic-settings
