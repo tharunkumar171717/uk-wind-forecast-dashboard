@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --color-ink: #0f1f3d;
+  --color-ink-2: #3d4b66;
+  --color-muted: #64708a;
+  --color-canvas: #f4f6f9;
+  --color-panel: #ffffff;
+  --color-line: #e1e5ec;
+  --color-nav: #0f1f3d;
+
+  --color-accent: #1f6fd1;
+  --color-accent-soft: #e8f1fc;
+  --color-brand: #1f8a5b;
+  --color-brand-soft: #e7f5ee;
+
+  /* Chart series: validated categorical slots 1 (blue) and 2 (orange). */
+  --color-forecast: #2a78d6;
+  --color-actual: #eb6834;
+  --color-grid: #e9ecf1;
+
+  --color-good: #0ca30c;
+  --color-warn: #b7791f;
+  --color-bad: #d03b3b;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
