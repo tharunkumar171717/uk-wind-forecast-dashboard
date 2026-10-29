@@ -9,11 +9,17 @@ export class ApiError extends Error {
   }
 }
 
-async function get(path, params) {
-  const qs = params ? `?${new URLSearchParams(params)}` : ''
+// Free Render instances sleep when idle; while waking, requests fail or return 502/503/504.
+// Retry those for about a minute instead of showing an error straight away.
+const RETRY_STATUS = new Set([502, 503, 504])
+export const RETRY_DELAYS_MS = import.meta.env.MODE === 'test' ? [] : [2000, 3000, 5000, 8000, 10000, 10000, 10000, 10000]
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+
+async function once(url) {
   let res
   try {
-    res = await fetch(`${BASE}${path}${qs}`, { headers: { Accept: 'application/json' } })
+    res = await fetch(url, { headers: { Accept: 'application/json' } })
   } catch {
     throw new ApiError(0, 'network_error', 'Cannot reach the API. Check that the backend is running.')
   }
@@ -28,6 +34,23 @@ async function get(path, params) {
     throw new ApiError(res.status, err?.code || 'http_error', err?.message || `Request failed (${res.status}).`)
   }
   return body
+}
+
+export async function requestWithRetry(url, delays = RETRY_DELAYS_MS) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await once(url)
+    } catch (err) {
+      const retryable = err.status === 0 || RETRY_STATUS.has(err.status)
+      if (!retryable || attempt >= delays.length) throw err
+      await sleep(delays[attempt])
+    }
+  }
+}
+
+function get(path, params) {
+  const qs = params ? `?${new URLSearchParams(params)}` : ''
+  return requestWithRetry(`${BASE}${path}${qs}`)
 }
 
 export const api = {

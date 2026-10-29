@@ -6,14 +6,14 @@ import { DatePicker } from '../components/DateControls'
 import EmptyState from '../components/EmptyState'
 import ErrorState from '../components/ErrorState'
 import KpiCard from '../components/KpiCard'
-import LoadingState from '../components/LoadingState'
+import { PageSkeleton, UpdatingBadge } from '../components/Skeleton'
 import { useApi } from '../hooks/useApi'
 import { fmtDay, fmtFullUK, fmtHours, fmtMW, fmtMWh, fmtPct, fmtSignedMW } from '../utils/format'
 
 export default function Overview({ metadata }) {
   const [params, setParams] = useSearchParams()
   const date = params.get('date') || '2026-01-15'
-  const { data, error, loading, reload } = useApi(() => api.forecasts(date), [date])
+  const { data, error, loading, refreshing, reload } = useApi(() => api.forecasts(date), [date])
 
   const k = data?.kpis
   const horizons = data?.series?.map((s) => s.horizon_hours).filter((h) => h != null) || []
@@ -22,18 +22,21 @@ export default function Overview({ metadata }) {
     <div className="space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h2 className="text-lg font-semibold">Overview: {fmtDay(date)}</h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-lg font-semibold">Overview: {fmtDay(date)}</h2>
+            {refreshing && <UpdatingBadge />}
+          </div>
           <p className="mt-0.5 text-sm text-muted">Retrospective comparison: forecast as of cutoff vs actual outturn</p>
         </div>
         <DatePicker value={date} onChange={(d) => setParams({ date: d })} />
       </div>
 
-      {loading && <LoadingState />}
+      {loading && !data && <PageSkeleton kpis={6} charts={1} />}
       {error && <ErrorState error={error} onRetry={reload} />}
       {data && data.status === 'no_data' && <EmptyState />}
 
       {data && data.status === 'ok' && (
-        <>
+        <div className={`space-y-5 transition-opacity ${refreshing ? 'opacity-50' : ''}`} aria-busy={refreshing}>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
             <KpiCard label="Forecast energy" value={fmtMWh(k.forecast_energy_mwh)} hint={`Actual ${fmtMWh(k.actual_energy_mwh)}`} />
             <KpiCard label="Avg forecast" value={fmtMW(k.mean_forecast_mw)} />
@@ -80,7 +83,7 @@ export default function Overview({ metadata }) {
           {metadata?.last_successful_ingestion && (
             <p className="text-xs text-muted">Last data refresh: {fmtFullUK(metadata.last_successful_ingestion)}</p>
           )}
-        </>
+        </div>
       )}
     </div>
   )

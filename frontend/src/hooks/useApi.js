@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 
 /**
- * Run `fetcher` whenever `deps` change. Returns { data, error, loading, reload }.
+ * Run `fetcher` whenever `deps` change. Returns { data, error, loading, refreshing, reload }.
+ * Previous data stays available while a new request loads (`refreshing`).
  * Stale responses from superseded requests are ignored.
  */
 export function useApi(fetcher, deps) {
@@ -21,5 +22,5 @@ export function useApi(fetcher, deps) {
   }, [...deps, tick])
 
   const reload = useCallback(() => setTick((t) => t + 1), [])
-  return { ...state, reload }
+  return { ...state, refreshing: state.loading && state.data != null, reload }
 }

@@ -66,10 +66,10 @@ export default function Layout({ metadata }) {
           </div>
           <div className="text-right text-xs text-muted">
             <div>
-              Cutoff: <span className="font-medium text-ink-2">{metadata?.cutoff ? `${metadata.cutoff.time_local} UK, D-${metadata.cutoff.days_before}` : '–'}</span>
+              Cutoff: <span className="font-medium text-ink-2">{metadata?.cutoff ? `${metadata.cutoff.time_local} UK, D-${metadata.cutoff.days_before}` : 'Loading…'}</span>
             </div>
             <div className="hidden sm:block">
-              Last data refresh: <span className="font-medium text-ink-2">{fmtFullUK(metadata?.last_successful_ingestion)}</span>
+              Last data refresh: <span className="font-medium text-ink-2">{metadata ? fmtFullUK(metadata.last_successful_ingestion) : 'Loading…'}</span>
             </div>
           </div>
         </header>

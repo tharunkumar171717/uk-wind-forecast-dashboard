@@ -5,7 +5,7 @@ import DataTable from '../components/DataTable'
 import { DatePicker } from '../components/DateControls'
 import EmptyState from '../components/EmptyState'
 import ErrorState from '../components/ErrorState'
-import LoadingState from '../components/LoadingState'
+import { PageSkeleton, UpdatingBadge } from '../components/Skeleton'
 import QualityBadge from '../components/QualityBadge'
 import { useApi } from '../hooks/useApi'
 import { fmtDay, fmtDateTimeUK, fmtFullUK, fmtNum, QUALITY_LABELS } from '../utils/format'
@@ -29,7 +29,7 @@ export default function DeliveryAnalysis() {
   const [params, setParams] = useSearchParams()
   const date = params.get('date') || '2026-01-15'
   const [quality, setQuality] = useState('all')
-  const { data, error, loading, reload } = useApi(() => api.deliveryAnalysis(date), [date])
+  const { data, error, loading, refreshing, reload } = useApi(() => api.deliveryAnalysis(date), [date])
 
   const rows = useMemo(
     () => (data?.rows || []).filter((r) => quality === 'all' || r.quality === quality),
@@ -40,7 +40,10 @@ export default function DeliveryAnalysis() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h2 className="text-lg font-semibold">Delivery-day analysis: {fmtDay(date)}</h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-lg font-semibold">Delivery-day analysis: {fmtDay(date)}</h2>
+            {refreshing && <UpdatingBadge />}
+          </div>
           <p className="mt-0.5 text-sm text-muted">
             Hourly intervals for the selected UK delivery day.
             {data?.cutoff_time && <> Cutoff: {fmtFullUK(data.cutoff_time)}.</>}
@@ -73,16 +76,18 @@ export default function DeliveryAnalysis() {
         </div>
       </div>
 
-      {loading && <LoadingState />}
+      {loading && !data && <PageSkeleton kpis={0} charts={0} table />}
       {error && <ErrorState error={error} onRetry={reload} />}
       {data && data.status === 'no_data' && <EmptyState />}
       {data && data.status === 'ok' && (
-        <DataTable
-          caption={`Hourly forecast vs actual for ${date}`}
-          columns={COLUMNS}
-          rows={rows.map((r) => ({ ...r, id: r.delivery_time }))}
-          pageSize={12}
-        />
+        <div className={`transition-opacity ${refreshing ? 'opacity-50' : ''}`} aria-busy={refreshing}>
+          <DataTable
+            caption={`Hourly forecast vs actual for ${date}`}
+            columns={COLUMNS}
+            rows={rows.map((r) => ({ ...r, id: r.delivery_time }))}
+            pageSize={12}
+          />
+        </div>
       )}
     </div>
   )
