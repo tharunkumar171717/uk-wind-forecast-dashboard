@@ -32,6 +32,13 @@ body,
   height: 100%;
 }
 
+html,
+body {
+  /* No rubber-band bounce past the page edge (it exposed a strip below the sidebar). */
+  overscroll-behavior-y: none;
+  background: var(--color-canvas);
+}
+
 body {
   background: var(--color-canvas);
   color: var(--color-ink);

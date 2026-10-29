@@ -17,7 +17,7 @@ export default function Layout({ metadata }) {
   return (
     <div className="flex min-h-full">
       <aside
-        className={`fixed inset-y-0 left-0 z-30 w-60 shrink-0 bg-nav text-white transition-transform md:static md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-30 w-60 shrink-0 bg-nav text-white transition-transform md:sticky md:top-0 md:h-screen md:self-start md:translate-x-0 ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
         aria-label="Main navigation"
