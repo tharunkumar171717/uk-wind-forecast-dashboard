@@ -17,6 +17,24 @@ All data is public Elexon (BMRS) data: **WINDFOR** for forecasts and **FUELHH** 
 - Every page has loading, empty ("No data yet: run ingestion") and error states.
 - **Demo mode** (`DATA_MODE=demo`) serves deterministic synthetic data, labelled everywhere: `data_mode: "demo"` in the API, a yellow banner in the UI, and `-SYNTHETIC-DEMO` in CSV filenames.
 
+## Tools we used and why
+
+| Tool | Used for | Why |
+|---|---|---|
+| **React** | The website screens | Builds pages from small reusable parts. Its virtual DOM updates only the part of the page that changed, so it stays fast. |
+| **Vite** | Running and building the React app | Very fast start-up and build. |
+| **Tailwind CSS** | Look and style | Quick to style, and every page looks the same. |
+| **Recharts** | Charts | Made for React, with hover boxes built in. |
+| **React Router** | Moving between the 4 pages | Changes page without a full reload. |
+| **Python + FastAPI** | The backend (API) | Fast and simple. It checks inputs for us and makes the `/docs` page by itself. |
+| **pandas + numpy** | Maths on the data | The standard tools for tables of numbers: matching hours, working out errors. |
+| **httpx** | Downloading data from Elexon | Simple, with timeouts and retries. |
+| **Supabase (PostgreSQL)** | Storing the data | A ready online Postgres database on a free plan, with no server to manage. We save the Elexon data once instead of downloading it on every visit. |
+| **SQLAlchemy + psycopg** | Talking to the database from Python | The standard, safe way to run queries. |
+| **Docker** | Running everything together | One command starts the database, backend and website the same way on any computer. |
+| **Vercel** | Putting it online | Free plan, and it deploys from GitHub automatically. |
+| **Pytest + Vitest** | Tests | The standard test tools for Python and React. |
+
 ## Results on real data (January 2026, cutoff 10:00 UK on D-1)
 
 | Matched hours | MAE | RMSE | Bias | WAPE | MAPE (actual ≥ 1,000 MW) |
