@@ -9,7 +9,7 @@ export class ApiError extends Error {
   }
 }
 
-// Free Render instances sleep when idle; while waking, requests fail or return 502/503/504.
+// A cold or restarting backend can fail or return 502/503/504 for a short while.
 // Retry those for about a minute instead of showing an error straight away.
 const RETRY_STATUS = new Set([502, 503, 504])
 export const RETRY_DELAYS_MS = import.meta.env.MODE === 'test' ? [] : [2000, 3000, 5000, 8000, 10000, 10000, 10000, 10000]

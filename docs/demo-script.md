@@ -58,7 +58,7 @@ Show the Mermaid diagram in the README: Elexon → `app.ingest` → Supabase Pos
 **3:30 – Tests, Docker, deploy (50 s)**
 - `pytest`: 44 pass, including Postgres integration against `postgres:16`. `npm test`: 10 pass.
 - `docker compose up --build`: db, backend (non-root, healthcheck) and frontend (nginx proxying `/api`).
-- `render.yaml` with `sync: false` secrets, and `vercel.json` with the SPA rewrite.
+- `backend/vercel.json` (Sydney region) and `frontend/vercel.json` (SPA rewrite); secrets only in Vercel settings.
 
 **4:20 – Trade-offs and next steps (40 s)**
 - An in-process cache is fine for a single instance. Use Redis or materialised tables to scale out.
@@ -73,7 +73,7 @@ Show the Mermaid diagram in the README: Elexon → `app.ingest` → Supabase Pos
 
 ## Recording checklist (unlisted YouTube)
 
-- [ ] Backend warm (hit `/api/health` and one page first; free Render instances sleep).
+- [ ] Backend warm (hit `/api/health` and one page first, so the first load is fast).
 - [ ] Browser at 1440×900, zoom 100%, no other tabs or bookmarks visible, notifications off.
 - [ ] Nothing secret on screen: no `.env`, no Supabase dashboard, no terminal history with URIs.
 - [ ] Record Part 1 and Part 2 separately. Each must be 5 minutes or less.

@@ -76,8 +76,7 @@ flowchart LR
 │   ├── src/{api,hooks,components,pages,utils,test}
 │   ├── Dockerfile, nginx.conf, vercel.json, .env.example
 ├── docs/demo-script.md
-├── docker-compose.yml
-└── render.yaml
+└── docker-compose.yml
 ```
 
 ## Elexon data
@@ -257,7 +256,7 @@ Rules shared by all endpoints:
 
 ## Environment variables
 
-**Backend** (`backend/.env`; on Render set them in the dashboard)
+**Backend** (`backend/.env` locally; on Vercel, set them in the backend project's Environment Variables)
 
 | Variable | Default | Notes |
 |---|---|---|
@@ -268,40 +267,41 @@ Rules shared by all endpoints:
 | `DATA_MODE` | `live` | `demo` serves labelled synthetic data |
 | `MAPE_MIN_ACTUAL_MW` | `1000` | MAPE threshold |
 | `CACHE_TTL_SECONDS` | `600` | In-memory cache TTL |
-| `WARM_CACHE` | `true` | Pre-load the evaluation window at startup |
+| `WARM_CACHE` | `true` | Pre-load the evaluation window at startup (set `false` on Vercel) |
 
 **Frontend** (`frontend/.env`, or Vercel project env)
 
 | Variable | Notes |
 |---|---|
-| `VITE_API_BASE_URL` | Backend origin, e.g. `https://<service>.onrender.com`. Leave empty for same-origin `/api` (dev proxy or nginx). Not secret. |
+| `VITE_API_BASE_URL` | Backend origin, e.g. `https://uk-wind-forecast-api.vercel.app`. Leave empty for same-origin `/api` (dev proxy or nginx). Not secret. |
 
 ## Deployment
 
-**Backend on Render.** `render.yaml` is a Blueprint (root `backend`, free plan, health check `/api/health`).
-1. In Render: New → Blueprint, and pick this repo.
-2. Set `DATABASE_URL` (secret, `sync: false`) and `CORS_ORIGINS=https://<vercel-app>.vercel.app` in the dashboard.
-3. The start command is `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
+Both parts run on Vercel, as two projects from this one repo.
+
+**Backend on Vercel** (FastAPI as a Vercel Function).
+1. Import the repo with root directory `backend`. Vercel finds `app` in `app/main.py`.
+2. `backend/vercel.json` sets the region to Sydney (`syd1`), next to the Supabase database, and `maxDuration` to 60 s.
+3. Set `DATABASE_URL` (secret), `CORS_ORIGINS=https://<frontend>.vercel.app`, `WARM_CACHE=false` and the cutoff variables.
+4. `.vercelignore` keeps `.env`, tests and the virtualenv out of the upload.
 
 **Frontend on Vercel.**
 1. Import the repo with root directory `frontend` and framework Vite.
-2. Set `VITE_API_BASE_URL=https://<render-service>.onrender.com`.
+2. Set `VITE_API_BASE_URL=https://<backend>.vercel.app`.
 3. `vercel.json` adds the SPA rewrite.
-
-Free Render instances sleep when idle, so the first request after a sleep can take about 30–60 s.
 
 ### Deployment status
 
 <!-- Only URLs that were verified with real requests are listed here. -->
 | What | URL | Verified (2026-10-29) |
 |---|---|---|
-| Live app (Vercel) | https://uk-wind-forecast-dashboard-two.vercel.app | `/`, `/accuracy`, `/delivery`, `/methodology` return 200; the bundle targets the Render API |
-| API (Render) | https://uk-wind-forecast-api-iisx.onrender.com | `/api/health` gives `{"status":"ok","database":"ok","data_mode":"live"}`; January MAE 2,122.8 MW over 744 matched hours (same as local); CORS allows only the Vercel origin |
-| API docs | https://uk-wind-forecast-api-iisx.onrender.com/docs | 200 |
+| Live app (Vercel) | https://uk-wind-forecast-dashboard-two.vercel.app | `/`, `/accuracy`, `/delivery`, `/methodology` return 200 |
+| API (Vercel, Sydney) | https://uk-wind-forecast-api.vercel.app | `/api/health` gives `{"status":"ok","database":"ok","data_mode":"live"}`; January MAE 2,122.8 MW over 744 matched hours (same as local); CSV export works; CORS allows only the app's origin |
+| API docs | https://uk-wind-forecast-api.vercel.app/docs | 200 |
 | Repository | https://github.com/tharunkumar171717/uk-wind-forecast-dashboard | public |
 | Demo video | not recorded yet | |
 
-The Render service was created with the Render CLI using the same settings as `render.yaml` (free plan, Singapore region, which is closest to the Supabase project in ap-southeast-2). The Vercel project is linked to this repo with root directory `frontend`.
+The frontend Vercel project is linked to this repo (root directory `frontend`) and deploys on every push to `main`. The backend Vercel project is deployed from the `backend` folder with `vercel deploy --prod`.
 
 ## AI tools disclosure
 
