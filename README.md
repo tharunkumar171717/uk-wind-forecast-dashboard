@@ -275,7 +275,15 @@ Free Render instances sleep when idle, so the first request after a sleep can ta
 ### Deployment status
 
 <!-- Only URLs that were verified with real requests are listed here. -->
-Not deployed yet.
+| What | URL | Verified (2026-10-29) |
+|---|---|---|
+| Live app (Vercel) | https://uk-wind-forecast-dashboard-two.vercel.app | `/`, `/accuracy`, `/delivery`, `/methodology` return 200; the bundle targets the Render API |
+| API (Render) | https://uk-wind-forecast-api-iisx.onrender.com | `/api/health` gives `{"status":"ok","database":"ok","data_mode":"live"}`; January MAE 2,122.8 MW over 744 matched hours (same as local); CORS allows only the Vercel origin |
+| API docs | https://uk-wind-forecast-api-iisx.onrender.com/docs | 200 |
+| Repository | https://github.com/tharunkumar171717/uk-wind-forecast-dashboard | public |
+| Demo video | not recorded yet | |
+
+The Render service was created with the Render CLI using the same settings as `render.yaml` (free plan, Singapore region, which is closest to the Supabase project in ap-southeast-2). The Vercel project is linked to this repo with root directory `frontend`.
 
 ## AI tools disclosure
 
